@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chats | ChatExpressDB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121212;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="container py-5">
+
+        <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= error[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } %>
+        <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <%= success[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <% } %>
+
+        <div class="text-center mb-4">
+            <h1 class="text-light">All Chats</h1>
+        </div>
+
+        <!-- Add Chat Form -->
+        <div class="card bg-light text-dark mb-5">
+            <div class="card-body">
+                <form action="/chats" method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="from" class="form-control" placeholder="From" >
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="to" class="form-control" placeholder="To" >
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="msg" class="form-control" placeholder="Message" >
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">Add Chat</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Chat List -->
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <% chats.forEach(chat => { %>
+                <div class="col">
+                    <div class="card bg-white text-dark h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <%= chat.from %> → <%= chat.to %>
+                            </h5>
+                            <p class="card-text"><%= chat.msg %></p>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-clock"></i> Sent at: 
+                                <span class="fw-semibold"><%= new Date(chat.createdAt).toLocaleString() %></span>
+                            </p>
+
+                            <% if (chat.updatedAt && chat.updatedAt.getTime() !== chat.createdAt.getTime()) { %>
+                                <p class="text-muted small mt-1 mb-0">
+                                    <i class="bi bi-pencil-square"></i> Edited at: 
+                                    <span class="fw-semibold"><%= new Date(chat.updatedAt).toLocaleString() %></span>
+                                </p>
+                            <% } %>
+
+
+                            <div class="d-flex justify-content-between">
+                                <form action="/chats/delete/<%= chat._id %>" method="POST" onsubmit="return confirm('Delete this chat?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                                <button class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#editChatModal<%= chat._id %>">
+                                    Edit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Chat Modal -->
+                <div class="modal fade" id="editChatModal<%= chat._id %>" tabindex="-1" aria-labelledby="editChatLabel<%= chat._id %>" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form action="/chats/edit/<%= chat._id %>" method="POST">
+                                <div class="modal-header">
+                                    <h5 class="modal-title text-dark" id="editChatLabel<%= chat._id %>">Edit Chat</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-dark">
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">From</label>
+                                        <input type="text" name="from" class="form-control" value="<%= chat.from %>" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">To</label>
+                                        <input type="text" name="to" class="form-control" value="<%= chat.to %>" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Message</label>
+                                        <textarea name="msg" class="form-control" required><%= chat.msg %></textarea>
+                                    </div>
+                                    
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
